@@ -1,0 +1,14 @@
+name: "A5 - Interactive Visualizations"
+navbar:
+  title: "A5 - Interactive Visualizations"
+  left: 
+    - text: "Home"
+      href: index.html
+    - text: "Plotly"
+      href: plotly.html
+    - text: "Altair"
+      href: altair.html
+output:
+  html_document:
+    theme: darkly
+    highlight: tango
