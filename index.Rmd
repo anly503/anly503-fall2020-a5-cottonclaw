@@ -1,0 +1,15 @@
+---
+title: "Visualizing Electricity Consumption & Occupancy (ECO)"
+author: "Chevy Robertson"
+date: "10/25/2021"
+output: html_document
+---
+
+
+This is the homepage of the website.
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
