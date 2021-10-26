@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Chevy Robertson" />
+
+<meta name="date" content="2021-10-25" />
+
+<title>Visualizing Electricity Consumption &amp; Occupancy (ECO)</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">A5 - Interactive Visualizations</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="plotly.html">Plotly</a>
+</li>
+<li>
+  <a href="altair.html">Altair</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Visualizing Electricity Consumption &amp; Occupancy (ECO)</h1>
+<h4 class="author">Chevy Robertson</h4>
+<h4 class="date">10/25/2021</h4>
+
+</div>
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>For this assignment, the aim was to use a data set to produce interactive visualizations that attempt to answer questions about the data. The data set in question represents a fraction of the ECO data set. The ECO data set was collected as part of the process in carrying out a project called “Smart Meter Services” that was undertaken by the Distributed Systems Group a little over 5 years ago. The data contain statistics on electricity consumption and occupancy at one-second time intervals for six different Swiss households for over a period of more than half a year. In this smaller portion, only data for three of these households are available. Upon exploration of the data, two questions arose:</p>
+<ol style="list-style-type: decimal">
+<li><p>For a particular household appliance, is there any observable trend for how the electricity consumption changes, on average, from hour to hour each day?</p></li>
+<li><p>With regard to both individual and all household appliances, how does average electricity consumption change across the days of a week?</p></li>
+</ol>
+<p>Below, a rationale is given for the data pre-processing steps and visualization design decisions that were made in an effort to answer these questions.</p>
+</div>
+<div id="rationale" class="section level2">
+<h2>Rationale</h2>
+<p>Before either visual was drafted, the data needed to be transformed into a representation more conducive for analysis. Since either question involved analyzing information at the appliance level, for each appliance of each household, data that contained power consumption measurements at each second was read in. Therefore, to be able to understand how the data change over much longer time intervals, variables were added to each data set that recorded the day and hour at which each measurement occurred. Then, considering negative electricity consumption values are nonsensical, any rows with measurements less than zero were filtered out of each data set. To produce average metrics, the next step in transforming the data involved creating two new data sets from each appliance-household combination: one for recording average consumption for a particular hour, and another for recording average consumption for a particular day of the week. In alignment with this operation, new data sets were formed by grouping each old one by the hour of the day and computing the average electricity consumption. Similarly, the second new version of the old data sets were formed by grouping by the day of the week. At this point, everything was in place to combine all of the data to form two final data sets: one with information at the hourly level, and another with information at the daily level.</p>
+<p>To visualize how the average hourly electric consumption changed for each appliance, the first instinct was to chart a time series of each measurement per hour. However, it was discovered that making a time series animate is actually quite complicated. This discovery prompted the decision to use a bar chart geometry instead to showcase the raw consumption value of each appliance, and a slider to allow someone to visualize the vertical increases and decreases in the bars (and thus the power) over time. To graph this representation appropriately, the x-axis was chosen to contain a bar for each appliance, and the y-axis was chosen to record the average power consumption (in Watts) for each appliance. In addition, a categorical color scheme and x-axis labels were added with the intent of allowing a user to more clearly identify each appliance. In case a user became interested in knowing the actual values, rather than just estimating using the height of each bar, a tooltip was included as well to show the appliance and time of day for each power measurement. Lastly, features were included in the visualization to allow a user to further interact and explore the data set. These included options to zoom, pan, and select specific portions of the data to observe.</p>
+<p>Due to the nature of the second question, the design decisions in drafting the second interactive visualization were slightly different. Like the first visualization, the purpose for creating the chart was to allow a user to view how the data change over time for each appliance. However, unlike the first visualization, the goal was to also illustrate the more general pattern of the aggregation of these appliances. Consequently, a stacked area plot was chosen for the overall geometry of the second interactive visualization. In doing so, this accomplished three goals: the lines between each stack were used to show change over time, each stack was used to identify a particular appliance, and the total of all the stacks was used to address how overall consumption changes from one day to the next. To better showcase the trends, each position on the x-axis contained a day of the week, and the y-axis measured the average power consumption. Just like the first plot, color was used a visual encoding to make the distinction between each appliance, and a tooltip was included to show the specific average power measurement with regard to any possible combination of day and appliance.</p>
+</div>
+<div id="visuals" class="section level2">
+<h2>Visuals</h2>
+<p>Average electric consumption changes at the hourly level can be explored by navigating to the “Plotly” page of the website. On the other hand, if one is more interested in exploring changes at the day-level, this can be explored by navigating to the “Altair” page of the website.</p>
+</div>
+<div id="sources" class="section level1">
+<h1>Sources</h1>
+<p>Wilhelm Kleiminger, Christian Beckel, Silvia Santini. Household Occupancy Monitoring Using Electricity Meters. Proceedings of the 2015 ACM International Joint Conference on Pervasive and Ubiquitous Computing (UbiComp 2015). Osaka, Japan, September 2015.</p>
+<p>Christian Beckel, Wilhelm Kleiminger, Romano Cicchetti, Thorsten Staake, and Silvia Santini. The ECO Data Set and the Performance of Non-Intrusive Load Monitoring Algorithms. Proceedings of the 1st ACM International Conference on Embedded Systems for Energy-Efficient Buildings (BuildSys 2014). Memphis, TN, USA. ACM, November 2014.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
