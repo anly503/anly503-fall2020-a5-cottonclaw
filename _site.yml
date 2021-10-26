@@ -1,4 +1,5 @@
 name: "A5 - Interactive Visualizations"
+output_dir: "docs"
 navbar:
   title: "A5 - Interactive Visualizations"
   left: 
